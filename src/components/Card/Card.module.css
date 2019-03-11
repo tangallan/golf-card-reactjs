@@ -1,0 +1,10 @@
+.Card {
+}
+
+.Card img {
+    width: 100%;
+}
+
+.CardHighlight {
+    border: 3px solid #f1c40f;
+}
