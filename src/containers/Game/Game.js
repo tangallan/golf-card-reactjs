@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import Card from '../../components/Card/Card';
 import Deck from '../../components/Deck/Deck';
 import FaceDownCard from '../../components/FaceDownCard/FaceDownCard';
+import UserScoreTable from '../../components/UserScoreTable/UserScoreTable';
 import classes from './Game.module.css';
 
 import { initGame } from '../../store/Utils';
@@ -16,6 +17,11 @@ class Game extends Component {
         loadingGame: true,
         middleCards: [],
         deck: [],
+        game: {
+            currentRound: 1,
+            numberOfPlayers: 2,
+            currentTurn: '',
+        },
         gamePlayers: {},
         currentPlayer: 'Allan',
 
@@ -29,7 +35,8 @@ class Game extends Component {
 
         flippedCards: [],
 
-        isUserMove: true
+        isUserMove: true,
+        gameHistory: {} //{ 'player1': 'score', 'player2': 'score' ... }
     };
 
     componentDidMount() {
@@ -173,6 +180,8 @@ class Game extends Component {
             selectingFromFaceDown: false,
             selectingFromFaceUp: false,
             selectedCardFromGamePlay: null
+        }, () => {
+            this.saveScoreIfNecc();
         });
     };
 
@@ -180,15 +189,20 @@ class Game extends Component {
         const flippedCards = [...this.state.flippedCards];
         flippedCards.push(this.state.selectedCardFromGamePlay.key);
 
-        this.setState({
-            flippedCards: flippedCards,
+        this.setState(
+            {
+                flippedCards: flippedCards,
 
-            selectingFromMiddle: false,
-            selectedMiddleCard: null,
-            selectingFromFaceDown: false,
-            selectingFromFaceUp: false,
-            selectedCardFromGamePlay: null
-        });
+                selectingFromMiddle: false,
+                selectedMiddleCard: null,
+                selectingFromFaceDown: false,
+                selectingFromFaceUp: false,
+                selectedCardFromGamePlay: null
+            },
+            () => {
+                this.saveScoreIfNecc();
+            }
+        );
     };
 
     calculateScore = () => {
@@ -223,6 +237,46 @@ class Game extends Component {
         });
 
         return score;
+    };
+
+    saveScoreIfNecc = () => {
+        if (this.state.flippedCards.length === 3) {
+            if (this.state.gameHistory[this.state.currentPlayer]) {
+                let userGameHistory = {
+                    ...this.state.gameHistory[this.state.currentPlayer],
+                    history: [
+                        ...this.state.gameHistory[this.state.currentPlayer][
+                            'history'
+                        ]
+                    ]
+                };
+                userGameHistory.history.push({
+                    round: this.state.game.currentRound,
+                    score: this.calculateScore()
+                });
+
+                this.setState({
+                    gameHistory: {
+                        [this.state.currentPlayer]: {
+                            history: userGameHistory.history
+                        }
+                    }
+                });
+            } else {
+                this.setState({
+                    gameHistory: {
+                        [this.state.currentPlayer]: {
+                            history: [
+                                {
+                                    round: this.state.game.currentRound,
+                                    score: this.calculateScore()
+                                }
+                            ]
+                        }
+                    }
+                });
+            }
+        }
     };
 
     render() {
@@ -390,9 +444,8 @@ class Game extends Component {
         if (this.state.flippedCards.length === 3) {
             game = (
                 <p className='alert alert-success'>
-                    You do not have any more moves, game is
-                    complete.
-                        </p>
+                    You do not have any more moves, game is complete.
+                </p>
             );
         }
 
@@ -402,8 +455,25 @@ class Game extends Component {
                 <section className='section-secondary'>
                     <div className='card'>
                         <h3 className='card-title'>
-                            Total Score: {totalUserScore}
+                            Current Score: {totalUserScore}
                         </h3>
+                    </div>
+                </section>
+
+                <section>
+                    <div className='row'>
+                        {Object.keys(this.state.gameHistory).map((g, idx) => {
+                            return (
+                                <div className='col col-sm-6' key={idx}>
+                                    <UserScoreTable
+                                        user={g}
+                                        scores={
+                                            this.state.gameHistory[g].history
+                                        }
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
                 </section>
             </div>
