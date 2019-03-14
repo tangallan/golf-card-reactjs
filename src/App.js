@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import classes from './App.module.css';
-import Game from './containers/Game/Game';
+import Home from './containers/Home/Home';
 
 class App extends Component {
   render() {
     return (
-        <div className={classes.App}>
-            <Game />
+        <div className={`container-small ${classes.App}`}>
+            <Home />
         </div>
     );
   }
