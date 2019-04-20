@@ -13,15 +13,9 @@ import Modal from '../../components/UI/Modal/Modal';
 class Game extends Component {
     state = {
         drewCardFromDeck: false,
-        completeMove: false,
-        loadingGame: true,
         middleCards: [],
         deck: [],
-        game: {
-            currentRound: 1,
-            numberOfPlayers: 2,
-            currentTurn: '',
-        },
+        currentRound: 1,
         gamePlayers: {},
         currentPlayer: 'Allan',
 
@@ -40,13 +34,12 @@ class Game extends Component {
     };
 
     componentDidMount() {
-        const newGame = initGame(['Allan', 'Grace']);
+        const newGame = initGame(['Allan', 'Gwu']);
         console.log('newGame', newGame);
         this.setState({
             middleCards: newGame.middleCards,
             deck: newGame.shuffledDeck,
-            gamePlayers: newGame.gamePlayers,
-            loadingGame: false
+            gamePlayers: newGame.gamePlayers
         });
     }
 
@@ -251,7 +244,7 @@ class Game extends Component {
                     ]
                 };
                 userGameHistory.history.push({
-                    round: this.state.game.currentRound,
+                    round: this.state.currentRound,
                     score: this.calculateScore()
                 });
 
@@ -268,7 +261,7 @@ class Game extends Component {
                         [this.state.currentPlayer]: {
                             history: [
                                 {
-                                    round: this.state.game.currentRound,
+                                    round: this.state.currentRound,
                                     score: this.calculateScore()
                                 }
                             ]
@@ -280,14 +273,6 @@ class Game extends Component {
     };
 
     render() {
-        if (this.state.loadingGame) {
-            return (
-                <div>
-                    <p>Loading....</p>
-                </div>
-            );
-        }
-
         let totalUserScore = this.calculateScore();
 
         if (!this.state.isUserMove) {
