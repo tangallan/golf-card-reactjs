@@ -6,6 +6,7 @@ import axios from 'axios';
 
 import Login from '../Login/Login';
 import SignUp from '../Signup/Signup';
+import Game from '../Game/Game';
 
 class Home extends Component {
     state = {
@@ -22,14 +23,22 @@ class Home extends Component {
         if (localStorage.getItem('expirationDate')) {
             const currentDate = new Date();
             let expDate = new Date(localStorage.getItem('expirationDate'));
-            expDate = expDate.setMinutes(expDate.getMinutes() - 15);
-
+            expDate.setMinutes(expDate.getMinutes() - 15);
+            
             if (expDate > currentDate) {
                 if (localStorage.getItem('userId')) {
                     this.setState({
                         isLoggingIn: false,
                         isSigningUp: false
                     });
+
+                    const remaingMs = expDate.getTime() - new Date().getTime();
+                    setTimeout(() => {
+                        this.setState({
+                            isLoggingIn: true,
+                            isSigningUp: false
+                        })
+                    }, remaingMs);
                 }
             } else {
                 localStorage.clear();
@@ -40,7 +49,7 @@ class Home extends Component {
     componentDidMount() {
         if (localStorage.getItem('userId')) {
             cardGameDbAxios
-                .get(`/games.json?auth=${localStorage.getItem('token')}`)
+                .get(`/games.json`)
                 .then(games => {
                     let gamesMapped = [];
                     if (games.data) {
@@ -79,7 +88,7 @@ class Home extends Component {
             this.state.totalPlayers
         );
         const response = await cardGameDbAxios.post(
-            `/games.json?auth=${localStorage.getItem('token')}`,
+            `/games.json`,
             newGame
         );
         const game = {
@@ -127,7 +136,11 @@ class Home extends Component {
         evt.preventDefault();
 
         this.setState({
-            selectedGame: g
+            selectedGame: null
+        }, () => {
+            this.setState({
+                selectedGame: g
+            })
         });
     };
 
@@ -284,7 +297,7 @@ class Home extends Component {
 
         let gameView = this.state.selectedGame ? (
             <div>
-                <h1>{this.state.selectedGame.gameid}</h1>
+                <Game gameId={this.state.selectedGame.gameid} />
             </div>
         ) : (
             <p>Please select or create a game.</p>

@@ -6,41 +6,20 @@ import FaceDownCard from '../../components/FaceDownCard/FaceDownCard';
 import UserScoreTable from '../../components/UserScoreTable/UserScoreTable';
 import classes from './Game.module.css';
 
-import { initGame } from '../../store/Utils';
-
 import Modal from '../../components/UI/Modal/Modal';
 
+import axiosDb from '../../axios-db';
+
 class Game extends Component {
-    state = {
-        drewCardFromDeck: false,
-        middleCards: [],
-        deck: [],
-        currentRound: 1,
-        gamePlayers: {},
-        currentPlayer: 'Allan',
-
-        selectingFromMiddle: false,
-        selectedMiddleCard: null,
-
-        selectingFromFaceDown: false,
-        selectingFromFaceUp: false,
-
-        selectedCardFromGamePlay: null,
-
-        flippedCards: [],
-
-        isUserMove: true,
-        gameHistory: {} //{ 'player1': 'score', 'player2': 'score' ... }
-    };
+    state = {};
 
     componentDidMount() {
-        const newGame = initGame(['Allan', 'Gwu']);
-        console.log('newGame', newGame);
-        this.setState({
-            middleCards: newGame.middleCards,
-            deck: newGame.shuffledDeck,
-            gamePlayers: newGame.gamePlayers
-        });
+        axiosDb.get(`/games/${this.props.gameId}.json`)
+            .then((res) => {
+                this.setState({
+                    ...res.data
+                });
+            });
     }
 
     drawFromDeckHandler = () => {
@@ -206,7 +185,7 @@ class Game extends Component {
         const faceDownsThatsFlipped = this.state.gamePlayers[
             this.state.currentPlayer
         ].faceDownCards.filter(
-            f => this.state.flippedCards.indexOf(f.key) >= 0
+            f => this.state.flippedCards && this.state.flippedCards.indexOf(f.key) >= 0
         );
 
         cardsToCount = [
@@ -273,9 +252,12 @@ class Game extends Component {
     };
 
     render() {
-        let totalUserScore = this.calculateScore();
+        if(!this.state.currentPlayer) {
+            return <p>Loading please wait...</p>
+        }
 
-        if (!this.state.isUserMove) {
+        let totalUserScore = this.calculateScore();
+        if (this.state.currentPlayer !== localStorage.getItem('userId')) {
             return (
                 <Modal title='Move Complete'>
                     <p>Sorry! It is not your move yet.</p>
@@ -326,7 +308,7 @@ class Game extends Component {
                             }
                             card={v}
                             isFlipped={
-                                this.state.flippedCards.indexOf(v.key) > -1
+                                this.state.flippedCards && this.state.flippedCards.indexOf(v.key) > -1
                             }
                         />
                     </div>
@@ -426,7 +408,7 @@ class Game extends Component {
         );
 
         // all the top cards has been flipped
-        if (this.state.flippedCards.length === 3) {
+        if (this.state.flippedCards && this.state.flippedCards.length === 3) {
             game = (
                 <p className='alert alert-success'>
                     You do not have any more moves, game is complete.
@@ -447,7 +429,7 @@ class Game extends Component {
 
                 <section>
                     <div className='row'>
-                        {Object.keys(this.state.gameHistory).map((g, idx) => {
+                        {this.state.gameHistory ? Object.keys(this.state.gameHistory).map((g, idx) => {
                             return (
                                 <div className='col col-sm-6' key={idx}>
                                     <UserScoreTable
@@ -458,7 +440,7 @@ class Game extends Component {
                                     />
                                 </div>
                             );
-                        })}
+                        }) : null}
                     </div>
                 </section>
             </div>

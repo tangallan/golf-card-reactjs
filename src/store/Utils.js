@@ -1,6 +1,6 @@
 import { CardDeck } from './Constants';
 
-export const shuffleArray = (arr) => {
+const shuffleArray = (arr) => {
     const result = [...arr];
 
     result.forEach((val, key) => {
@@ -11,39 +11,6 @@ export const shuffleArray = (arr) => {
     });
 
     return result;
-};
-
-export const initGame = (players) => {
-    let shuffledDeck = shuffleArray(CardDeck);
-
-    let middleCards = [];
-    middleCards.push(shuffledDeck[0]);
-    shuffledDeck = shuffledDeck.filter(f => f !== shuffledDeck[0]);
-
-    let index = 0;
-    let gamePlayers = {};
-    players.forEach((v) => {
-        gamePlayers[v] = {
-            faceDownCards: [],
-            faceUpCards: []
-        };
-        for(let i = 0; i < 3; i++) {
-            gamePlayers[v].faceDownCards.push(shuffledDeck[index]);
-            index++;
-        }
-
-        for (let i = 0; i < 3; i++) {
-            gamePlayers[v].faceUpCards.push(shuffledDeck[index]);
-            index++;
-        }
-    });
-    shuffledDeck.splice(0, (index));
-
-    return {
-        shuffledDeck: shuffledDeck,
-        middleCards: middleCards,
-        gamePlayers: gamePlayers
-    }
 };
 
 export const initNewGame = (players, totalPlayers = 2) => {
@@ -73,12 +40,20 @@ export const initNewGame = (players, totalPlayers = 2) => {
     shuffledDeck.splice(0, (index));
 
     return {
-        shuffledDeck: shuffledDeck,
+        drewCardFromDeck: false,
         middleCards: middleCards,
-        totalPlayers: totalPlayers,
-        flippedCards: [],
-        gamePlayers: gamePlayers,
+        deck: shuffledDeck,
         currentRound: 1,
-        currentPlayer: players[0]
+        gamePlayers: gamePlayers,
+        currentPlayer: players[0],
+        flippedCards: [],
+        gameHistory: {}, //{ 'player1': 'score', 'player2': 'score' ... }
+        totalPlayers: totalPlayers,
+
+        selectingFromMiddle: false,
+        selectedMiddleCard: null,
+        selectingFromFaceDown: false,
+        selectingFromFaceUp: false,
+        selectedCardFromGamePlay: null,
     };
 };
