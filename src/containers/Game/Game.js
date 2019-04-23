@@ -59,7 +59,7 @@ class Game extends Component {
                 });
             } else {
                 if (
-                    this.state.selectedCardFromGamePlay !== null &&
+                    !!this.state.selectedCardFromGamePlay &&
                     this.state.selectedCardFromGamePlay !== card
                 ) {
                     this.setState({
@@ -90,7 +90,7 @@ class Game extends Component {
                 });
             } else {
                 if (
-                    this.state.selectedCardFromGamePlay !== null &&
+                    !!this.state.selectedCardFromGamePlay &&
                     this.state.selectedCardFromGamePlay !== card
                 ) {
                     this.setState(prevState => {
@@ -116,7 +116,11 @@ class Game extends Component {
     swapClickHandler = () => {
         let middleCards = [...this.state.middleCards];
         const swappingWith = { ...this.state.selectedCardFromGamePlay };
-        const flippedCards = [...this.state.flippedCards];
+
+        let flippedCards = [];
+        if(this.state.flippedCards) {
+            flippedCards = [...this.state.flippedCards];
+        }
 
         let faceDownCards = [
             ...this.state.gamePlayers[this.state.currentPlayer].faceDownCards
@@ -158,7 +162,11 @@ class Game extends Component {
     };
 
     flipClickHandler = () => {
-        const flippedCards = [...this.state.flippedCards];
+        let flippedCards = [];
+        if(this.state.flippedCards) {
+            flippedCards = [...this.state.flippedCards];
+        }
+        
         flippedCards.push(this.state.selectedCardFromGamePlay.key);
 
         this.setState(
@@ -212,7 +220,8 @@ class Game extends Component {
     };
 
     saveScoreIfNecc = () => {
-        if (this.state.flippedCards.length === 3) {
+        console.log('this.state.flippedCards', this.state.flippedCards);
+        if (this.state.flippedCards && this.state.flippedCards.length === 3) {
             if (this.state.gameHistory[this.state.currentPlayer]) {
                 let userGameHistory = {
                     ...this.state.gameHistory[this.state.currentPlayer],
@@ -256,6 +265,7 @@ class Game extends Component {
             return <p>Loading please wait...</p>
         }
 
+        console.log(this.state);
         let totalUserScore = this.calculateScore();
         if (this.state.currentPlayer !== localStorage.getItem('userId')) {
             return (
