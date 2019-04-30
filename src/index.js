@@ -13,17 +13,20 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 // reducers
 import authReducer from './store/reducers/auth';
 import signUpReducer from './store/reducers/signup';
+import gamesReducer from './store/reducers/games';
 
 // sagas
 import { watchAuth } from './store/sagas/auth';
 import { watchSignUp } from './store/sagas/signup';
+import { watchGame } from './store/sagas/games';
 
 // compose enhancers
 const composeEnhancers = process.env.NODE_ENV === 'development' ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__: null || compose;
 
 const rootReducers = combineReducers({
     auth: authReducer,
-    signup: signUpReducer
+    signup: signUpReducer,
+    gameProvider: gamesReducer
 });
 const sagaMiddleware = createSagaMiddleware();
 
@@ -33,6 +36,7 @@ const store = createStore(
 );
 sagaMiddleware.run(watchAuth);
 sagaMiddleware.run(watchSignUp);
+sagaMiddleware.run(watchGame);
 
 const app = (
     <Provider store={store}>

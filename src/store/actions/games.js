@@ -1,49 +1,82 @@
 import * as actionTypes from './actionTypes';
 
-export const startNewGame = () => {
+export const creatingGame = () => {
     return {
-        type: actionTypes.CREATE_NEW_GAME
+        type: actionTypes.CREATING_GAME
     }
 };
 
-export const startNewGameSuccess = newGame => {
+export const createGameStart = (game) => {
     return {
-        type: actionTypes.CREATE_NEW_GAME_SUCCESS,
-        game: newGame
+        type: actionTypes.CREATE_GAME_START,
+        payload: {
+            game: game
+        }
+    };
+};
+
+export const createGameSuccess = () => {
+    return {
+        type: actionTypes.CREATE_GAME_SUCCESS
     }
 };
 
-export const startNewGameFail = (error) => {
+export const createGameFailed = () => {
     return {
-        type: actionTypes.CREATE_NEW_GAME_FAILED,
-        error: error
+        type: actionTypes.CREATE_GAME_FAILED
     }
 };
 
 
-export const fetchActiveGames = (userid) => {
+// fetching games / game
+export const fetchingGames = () => {
     return {
-        type: actionTypes.FETCH_ACTIVE_GAMES,
-        userid: userid
+        type: actionTypes.FETCHING_GAMES
     }
 };
 
-export const fetchActiveGamesStart = () => {
+export const fetchGamesSuccess = (games) => {
     return {
-        type: actionTypes.FETCH_ACTIVE_GAMES_START
+        type: actionTypes.FETCH_GAMES_SUCCESS,
+        payload: {
+            games: games
+        }
     }
 };
 
-export const fetchActiveGamesSuccess = (games) => {
+export const fetchGamesFailed = (error) => {
     return {
-        type: actionTypes.FETCH_ACTIVE_GAMES_SUCCESS,
-        games: games
+        type: actionTypes.FETCH_GAMES_FAILED,
+        payload: {
+            error: error
+        }
+    };
+};
+
+export const fetchingSingleGame = (gameId) => {
+    return {
+        type: actionTypes.FETCHING_SINGLE_GAME,
+        payload: {
+            gameId: gameId
+        }
     }
 };
 
-export const fetchActiveGamesFailed = (error) => {
+export const fetchSingleGameSuccess = (game) => {
     return {
-        type: actionTypes.FETCH_ACTIVE_GAMES_FAILED,
-        error: error
+        type: actionTypes.FETCH_SINGLE_GAME_SUCCESS,
+        payload: {
+            game: game
+        }
+    }
+};
+
+export const fetchSingleGameFailed = (error) => {
+    return {
+        type: actionTypes.FETCH_SINGLE_GAME_SUCCESS,
+        payload: {
+            error: error,
+            game: null
+        }
     }
 };

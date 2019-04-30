@@ -1,14 +1,16 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
 import cardGameDbAxios from '../../axios-db';
 import { initNewGame } from '../../store/Utils';
+import * as actions from '../../store/actions';
 
 import Game from '../Game/Game';
 
 class Home extends Component {
     state = {
         creatingNewGame: false,
-        games: [],
         totalPlayers: 2,
         canCreateGame: true,
         selectedGame: null,
@@ -16,31 +18,11 @@ class Home extends Component {
         isSigningUp: false
     };
 
-    componentWillMount() {
-        this.getGamesForUser();
+    componentWillMount() {}
+
+    componentDidMount() {
+        this.props.fetchingGames();
     }
-
-    componentDidMount() { }
-
-    getGamesForUser = () => {
-        cardGameDbAxios.get(`/games.json?auth=${localStorage.getItem('token')}`).then(games => {
-            let gamesMapped = [];
-            if (games.data) {
-                gamesMapped = Object.keys(games.data).map(m => {
-                    return {
-                        gameid: m,
-                        game: {
-                            ...games.data[m]
-                        }
-                    };
-                });
-            }
-
-            this.setState({
-                games: gamesMapped
-            });
-        });
-    };
 
     startCreateNewGame = () => {
         this.setState({
@@ -59,7 +41,10 @@ class Home extends Component {
             [localStorage.getItem('userId')],
             this.state.totalPlayers
         );
-        const response = await cardGameDbAxios.post(`/games.json?auth=${localStorage.getItem('token')}`, newGame);
+        const response = await cardGameDbAxios.post(
+            `/games.json?auth=${localStorage.getItem('token')}`,
+            newGame
+        );
         const game = {
             gameid: response.data.name,
             game: {
@@ -117,65 +102,86 @@ class Home extends Component {
     };
 
     render() {
-        let games = this.state.games.map((m, idx) => {
-            return (
-                <li key={m.gameid}>
-                    <a href='#' onClick={evt => this.selectGame(evt, m)}>
-                        {m.gameid}
-                    </a>
-                </li>
+        // let games = this.state.games.map((m, idx) => {
+        //     return (
+        //         <li key={m.gameid}>
+        //             <a href='#' onClick={evt => this.selectGame(evt, m)}>
+        //                 {m.gameid}
+        //             </a>
+        //         </li>
+        //     );
+        // });
+        // let createGameModal = this.state.creatingNewGame ? (
+        //     <div className='modal-mask'>
+        //         <div className='modal'>
+        //             <div className='modal-head'>
+        //                 <p className='modal-title'>New Game</p>
+        //             </div>
+        //             <div className='modal-body'>
+        //                 <div className='form-control'>
+        //                     <label>Number of Players?</label>
+        //                     <br />
+        //                     <small>Only up to 4 players</small>
+        //                     <input
+        //                         type='text'
+        //                         placeholder='Enter number of players'
+        //                         min='2'
+        //                         max='4'
+        //                         value={this.state.totalPlayers}
+        //                         onChange={this.setTotalPlayers}
+        //                     />
+        //                 </div>
+        //             </div>
+        //             <div className='modal-footer'>
+        //                 <button
+        //                     className='button-primary'
+        //                     onClick={this.saveNewGame}
+        //                     disabled={!this.state.canCreateGame}
+        //                 >
+        //                     Create
+        //                 </button>
+        //                 <button
+        //                     className='button-danger'
+        //                     onClick={this.cancelCreateNewGame}
+        //                 >
+        //                     Cancel
+        //                 </button>
+        //             </div>
+        //         </div>
+        //     </div>
+        // ) : null;
+
+        // let gameView = this.state.selectedGame ? (
+        //     <div>
+        //         <Game gameId={this.state.selectedGame.gameid} />
+        //     </div>
+        // ) : (
+        //     <p>Please select or create a game.</p>
+        // );
+
+        // if (createGameModal) {
+        //     return createGameModal;
+        // }
+
+        let gameList = null;
+        if (this.props.loadingGames) {
+            gameList = <p className='align-center'>Loading...</p>;
+        } else {
+            const gamesListElement = this.props.games.map((m, idx) => {
+                return (
+                    <li key={m.gameid}>
+                        <a href='#' onClick={evt => this.selectGame(evt, m)}>
+                            {m.gameid}
+                        </a>
+                    </li>
+                );
+            });
+
+            gameList = (
+                <ul className='sidebar-links'>
+                    {gamesListElement}
+                </ul>
             );
-        });
-        let createGameModal = this.state.creatingNewGame ? (
-            <div className='modal-mask'>
-                <div className='modal'>
-                    <div className='modal-head'>
-                        <p className='modal-title'>New Game</p>
-                    </div>
-                    <div className='modal-body'>
-                        <div className='form-control'>
-                            <label>Number of Players?</label>
-                            <br />
-                            <small>Only up to 4 players</small>
-                            <input
-                                type='text'
-                                placeholder='Enter number of players'
-                                min='2'
-                                max='4'
-                                value={this.state.totalPlayers}
-                                onChange={this.setTotalPlayers}
-                            />
-                        </div>
-                    </div>
-                    <div className='modal-footer'>
-                        <button
-                            className='button-primary'
-                            onClick={this.saveNewGame}
-                            disabled={!this.state.canCreateGame}
-                        >
-                            Create
-                        </button>
-                        <button
-                            className='button-danger'
-                            onClick={this.cancelCreateNewGame}
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
-        ) : null;
-
-        let gameView = this.state.selectedGame ? (
-            <div>
-                <Game gameId={this.state.selectedGame.gameid} />
-            </div>
-        ) : (
-            <p>Please select or create a game.</p>
-        );
-
-        if (createGameModal) {
-            return createGameModal;
         }
 
         return (
@@ -190,13 +196,32 @@ class Home extends Component {
                                 Create New Game
                             </button>
                         </div>
-                        <ul className='sidebar-links'>{games}</ul>
+                        {/* <ul className='sidebar-links'>{games}</ul> */}
+                        {gameList}
                     </div>
                 </div>
-                <div className='col col-lg-8'>{gameView}</div>
+                <div className='col col-lg-8'>{/* {gameView} */}</div>
             </div>
         );
     }
 }
 
-export default Home;
+const mapStateToProps = state => {
+    return {
+        games: state.gameProvider.games,
+        gameError: state.gameProvider.error,
+        loadingGames: state.gameProvider.loadingGames,
+        creatingNewGame: state.gameProvider.creatingNewGame
+    };
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        fetchingGames: () => dispatch(actions.fetchingGames())
+    };
+};
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(Home);
