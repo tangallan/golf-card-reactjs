@@ -2,10 +2,7 @@
 import React, { Component } from 'react';
 import cardGameDbAxios from '../../axios-db';
 import { initNewGame } from '../../store/Utils';
-import axios from 'axios';
 
-import Login from '../Login/Login';
-import SignUp from '../Signup/Signup';
 import Game from '../Game/Game';
 
 class Home extends Component {
@@ -20,40 +17,13 @@ class Home extends Component {
     };
 
     componentWillMount() {
-        // if (localStorage.getItem('expirationDate')) {
-        //     const currentDate = new Date();
-        //     let expDate = new Date(localStorage.getItem('expirationDate'));
-        //     expDate.setMinutes(expDate.getMinutes() - 15);
-
-        //     if (expDate > currentDate) {
-        //         if (localStorage.getItem('userId')) {
-        //             this.setState({
-        //                 isLoggingIn: false,
-        //                 isSigningUp: false
-        //             });
-
-        //             const remaingMs = expDate.getTime() - new Date().getTime();
-        //             setTimeout(() => {
-        //                 this.setState({
-        //                     isLoggingIn: true,
-        //                     isSigningUp: false
-        //                 });
-        //             }, remaingMs);
-        //         }
-        //     } else {
-        //         localStorage.clear();
-        //     }
-        // }
+        this.getGamesForUser();
     }
 
-    componentDidMount() {
-        // if (localStorage.getItem('userId')) {
-        //     this.getGamesForUser();
-        // }
-    }
+    componentDidMount() { }
 
     getGamesForUser = () => {
-        cardGameDbAxios.get(`/games.json`).then(games => {
+        cardGameDbAxios.get(`/games.json?auth=${localStorage.getItem('token')}`).then(games => {
             let gamesMapped = [];
             if (games.data) {
                 gamesMapped = Object.keys(games.data).map(m => {
@@ -89,7 +59,7 @@ class Home extends Component {
             [localStorage.getItem('userId')],
             this.state.totalPlayers
         );
-        const response = await cardGameDbAxios.post(`/games.json`, newGame);
+        const response = await cardGameDbAxios.post(`/games.json?auth=${localStorage.getItem('token')}`, newGame);
         const game = {
             gameid: response.data.name,
             game: {
@@ -146,110 +116,7 @@ class Home extends Component {
         );
     };
 
-    onSignUp = async (evt, email, password) => {
-        evt.preventDefault();
-
-        const constSignUpUrl = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=${
-            process.env.REACT_APP_FIREBASE_API_KEY
-        }`;
-        const authData = {
-            email: email,
-            password: password,
-            returnSecureToken: true
-        };
-
-        try {
-            await axios.post(constSignUpUrl, authData);
-            this.setState({
-                isSigningUp: false,
-                isLoggingIn: true
-            });
-        } catch (error) {
-            if (error.response) {
-                // Request made and server responded
-                // console.log(error.response.data.error.message);
-                // console.log(error.response.status);
-                // console.log(error.response.headers);
-                alert(error.response.data.error.message);
-            } else {
-                alert('Unable to signup, please try again later.');
-            }
-        }
-    };
-
-    onCancelSignup = evt => {
-        this.setState({
-            isSigningUp: false,
-            isLoggingIn: true
-        });
-    };
-
-    onLogin = async (evt, email, password) => {
-        evt.preventDefault();
-
-        const loginUrl = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=${
-            process.env.REACT_APP_FIREBASE_API_KEY
-        }`;
-        const authData = {
-            email: email,
-            password: password,
-            returnSecureToken: true
-        };
-
-        try {
-            const loginResp = await axios.post(loginUrl, authData);
-            const expirationDate = new Date(
-                new Date().getTime() + loginResp.data.expiresIn * 1000
-            );
-            localStorage.setItem('token', loginResp.data.idToken);
-            localStorage.setItem('expirationDate', expirationDate);
-            localStorage.setItem('userId', loginResp.data.localId);
-
-            this.setState({
-                isSigningUp: false,
-                isLoggingIn: false
-            }, () => {
-                
-            });
-        } catch (error) {
-            if (error.response) {
-                // Request made and server responded
-                // console.log(error.response.data.error.message);
-                // console.log(error.response.status);
-                // console.log(error.response.headers);
-                alert(error.response.data.error.message);
-            } else {
-                alert('Unable to login, please try again.');
-            }
-        }
-    };
-
-    onChangeToSignUp = evt => {
-        this.setState({
-            isSigningUp: true,
-            isLoggingIn: false
-        });
-    };
-
     render() {
-        if (this.state.isLoggingIn) {
-            return (
-                <Login
-                    onLogin={this.onLogin}
-                    onTrySignUp={this.onChangeToSignUp}
-                />
-            );
-        }
-
-        if (this.state.isSigningUp) {
-            return (
-                <SignUp
-                    onSignUp={this.onSignUp}
-                    onCancelSignup={this.onCancelSignup}
-                />
-            );
-        }
-
         let games = this.state.games.map((m, idx) => {
             return (
                 <li key={m.gameid}>

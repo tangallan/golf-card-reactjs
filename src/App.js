@@ -28,14 +28,10 @@ class App extends Component {
             );
         } else {
             routes = (
-                // <Switch>
-                //     <Route path='/' component={Home} />
-                //     <Redirect to='/' />
-                // </Switch>
-                <div>
-                    <p>Logged In</p>
-                    <button type='button' onClick={this.props.logout}>Logout</button>
-                </div>
+                <Switch>
+                    <Route path='/' exact component={Home} />
+                    <Redirect to='/' />
+                </Switch>
             );
         }
 

@@ -14,7 +14,7 @@ class Game extends Component {
     state = {};
 
     componentDidMount() {
-        axiosDb.get(`/games/${this.props.gameId}.json`)
+        axiosDb.get(`/games/${this.props.gameId}.json?auth=${localStorage.getItem('token')}`)
             .then((res) => {
                 this.setState({
                     ...res.data
