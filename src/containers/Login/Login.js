@@ -28,7 +28,18 @@ class Login extends Component {
         }
     };
 
+    goToSignUp = () => {
+        this.props.history.push('/signup');
+    };
+
     render() {
+        let authError = null;
+        if(this.props.authError) {
+            authError = <div className='alert alert-danger'>
+                <p>{this.props.authError.message ? this.props.authError.message : 'Unexpected error, please try again.'}</p>
+            </div>
+        }
+
         return (
             <>
                 <form onSubmit={this.onLogin}>
@@ -50,7 +61,8 @@ class Login extends Component {
                             onChange={this.onPasswordChange}
                         />
                     </div>
-
+                    {authError}
+                    
                     <button type='submit' className='button-success'
                         disabled={this.props.isLoggingIn}
                         >
@@ -58,7 +70,7 @@ class Login extends Component {
                     </button>
 
                     <button type='button' className='button-warning' 
-                        // onClick={this.props.onTrySignUp}
+                        onClick={this.goToSignUp}
                         >
                         Signup
                     </button>
@@ -72,8 +84,9 @@ const mapStateToProps = state => {
     return {
         email: state.auth.email,
         password: state.auth.password,
-        isLoggingIn: state.auth.loading
-    }
+        isLoggingIn: state.auth.loading,
+        authError: state.auth.error
+    };
 };
 
 const mapDispatchToProps = dispatch => {

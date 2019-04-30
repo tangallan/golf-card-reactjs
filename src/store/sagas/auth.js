@@ -48,7 +48,6 @@ function* logoutSaga(action) {
 // trigger by actionTypes.AUTH_START
 function* loggingIn(action) {
     const { email, password } = action.payload;
-    console.log(email);
 
     const loginUrl = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=${
         process.env.REACT_APP_FIREBASE_API_KEY
@@ -80,7 +79,6 @@ function* loggingIn(action) {
             }));
 
         } else {
-            console.log('Unable to login, please try again.');
             yield put(actions.authFail({
                 message: 'Unable to login, please try again.'
             }));
