@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
+import * as actionTypes from '../../store/actions/index';
 
 class Login extends Component {
     state = {
@@ -18,18 +21,17 @@ class Login extends Component {
         });
     };
 
+    onLogin = evt => {
+        evt.preventDefault();
+        if(this.state.email && this.state.password) {
+            this.props.login(this.state.email, this.state.password);
+        }
+    };
+
     render() {
         return (
             <>
-                <form
-                    onSubmit={evt =>
-                        this.props.onLogin(
-                            evt,
-                            this.state.email,
-                            this.state.password
-                        )
-                    }
-                >
+                <form onSubmit={this.onLogin}>
                     <div className='form-control'>
                         <label>Email</label>
                         <input
@@ -49,11 +51,15 @@ class Login extends Component {
                         />
                     </div>
 
-                    <button type='submit' className='button-success'>
+                    <button type='submit' className='button-success'
+                        disabled={this.props.isLoggingIn}
+                        >
                         Login
                     </button>
 
-                    <button type='button' className='button-warning' onClick={this.props.onTrySignUp}>
+                    <button type='button' className='button-warning' 
+                        // onClick={this.props.onTrySignUp}
+                        >
                         Signup
                     </button>
                 </form>
@@ -62,4 +68,18 @@ class Login extends Component {
     }
 }
 
-export default Login;
+const mapStateToProps = state => {
+    return {
+        email: state.auth.email,
+        password: state.auth.password,
+        isLoggingIn: state.auth.loading
+    }
+};
+
+const mapDispatchToProps = dispatch => {
+    return {
+        login: (email, password) => dispatch(actionTypes.authStart(email, password))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

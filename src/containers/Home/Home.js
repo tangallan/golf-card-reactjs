@@ -20,55 +20,57 @@ class Home extends Component {
     };
 
     componentWillMount() {
-        if (localStorage.getItem('expirationDate')) {
-            const currentDate = new Date();
-            let expDate = new Date(localStorage.getItem('expirationDate'));
-            expDate.setMinutes(expDate.getMinutes() - 15);
-            
-            if (expDate > currentDate) {
-                if (localStorage.getItem('userId')) {
-                    this.setState({
-                        isLoggingIn: false,
-                        isSigningUp: false
-                    });
+        // if (localStorage.getItem('expirationDate')) {
+        //     const currentDate = new Date();
+        //     let expDate = new Date(localStorage.getItem('expirationDate'));
+        //     expDate.setMinutes(expDate.getMinutes() - 15);
 
-                    const remaingMs = expDate.getTime() - new Date().getTime();
-                    setTimeout(() => {
-                        this.setState({
-                            isLoggingIn: true,
-                            isSigningUp: false
-                        })
-                    }, remaingMs);
-                }
-            } else {
-                localStorage.clear();
-            }
-        }
+        //     if (expDate > currentDate) {
+        //         if (localStorage.getItem('userId')) {
+        //             this.setState({
+        //                 isLoggingIn: false,
+        //                 isSigningUp: false
+        //             });
+
+        //             const remaingMs = expDate.getTime() - new Date().getTime();
+        //             setTimeout(() => {
+        //                 this.setState({
+        //                     isLoggingIn: true,
+        //                     isSigningUp: false
+        //                 });
+        //             }, remaingMs);
+        //         }
+        //     } else {
+        //         localStorage.clear();
+        //     }
+        // }
     }
 
     componentDidMount() {
-        if (localStorage.getItem('userId')) {
-            cardGameDbAxios
-                .get(`/games.json`)
-                .then(games => {
-                    let gamesMapped = [];
-                    if (games.data) {
-                        gamesMapped = Object.keys(games.data).map(m => {
-                            return {
-                                gameid: m,
-                                game: {
-                                    ...games.data[m]
-                                }
-                            };
-                        });
-                    }
-
-                    this.setState({
-                        games: gamesMapped
-                    });
-                });
-        }
+        // if (localStorage.getItem('userId')) {
+        //     this.getGamesForUser();
+        // }
     }
+
+    getGamesForUser = () => {
+        cardGameDbAxios.get(`/games.json`).then(games => {
+            let gamesMapped = [];
+            if (games.data) {
+                gamesMapped = Object.keys(games.data).map(m => {
+                    return {
+                        gameid: m,
+                        game: {
+                            ...games.data[m]
+                        }
+                    };
+                });
+            }
+
+            this.setState({
+                games: gamesMapped
+            });
+        });
+    };
 
     startCreateNewGame = () => {
         this.setState({
@@ -87,10 +89,7 @@ class Home extends Component {
             [localStorage.getItem('userId')],
             this.state.totalPlayers
         );
-        const response = await cardGameDbAxios.post(
-            `/games.json`,
-            newGame
-        );
+        const response = await cardGameDbAxios.post(`/games.json`, newGame);
         const game = {
             gameid: response.data.name,
             game: {
@@ -135,13 +134,16 @@ class Home extends Component {
     selectGame = (evt, g) => {
         evt.preventDefault();
 
-        this.setState({
-            selectedGame: null
-        }, () => {
-            this.setState({
-                selectedGame: g
-            })
-        });
+        this.setState(
+            {
+                selectedGame: null
+            },
+            () => {
+                this.setState({
+                    selectedGame: g
+                });
+            }
+        );
     };
 
     onSignUp = async (evt, email, password) => {
@@ -206,6 +208,8 @@ class Home extends Component {
             this.setState({
                 isSigningUp: false,
                 isLoggingIn: false
+            }, () => {
+                
             });
         } catch (error) {
             if (error.response) {

@@ -7,28 +7,28 @@ class SignUp extends Component {
     };
 
     onEmailChange = evt => {
-        this.setState({
-            email: evt.target.value
-        });
+        // this.setState({
+        //     email: evt.target.value
+        // });
     };
 
     onPasswordChange = evt => {
-        this.setState({
-            password: evt.target.value
-        });
+        // this.setState({
+        //     password: evt.target.value
+        // });
     };
 
     render() {
         return (
             <>
                 <form
-                    onSubmit={evt =>
-                        this.props.onSignUp(
-                            evt,
-                            this.state.email,
-                            this.state.password
-                        )
-                    }
+                    // onSubmit={evt =>
+                    //     this.props.onSignUp(
+                    //         evt,
+                    //         this.state.email,
+                    //         this.state.password
+                    //     )
+                    // }
                 >
                     <div className='form-control'>
                         <label>Email</label>
@@ -52,8 +52,8 @@ class SignUp extends Component {
                     <button type='submit' className='button-success'>
                         Sign Up
                     </button>
-
-                    <button type='button' className='button-danger' onClick={this.props.onCancelSignup}>
+                    {/* onClick={this.props.onCancelSignup} */}
+                    <button type='button' className='button-danger'>
                         Cancel
                     </button>
                 </form>

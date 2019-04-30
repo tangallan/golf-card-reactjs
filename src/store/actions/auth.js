@@ -6,9 +6,13 @@ export const authCheckState = () => {
     };
 };
 
-export const authStart = () => {
+export const authStart = (email, password) => {
     return {
-        type: actionTypes.AUTH_START
+        type: actionTypes.AUTH_START,
+        payload: {
+            email: email,
+            password: password
+        }
     }
 };
 
