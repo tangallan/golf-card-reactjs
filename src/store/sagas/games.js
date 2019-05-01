@@ -1,4 +1,4 @@
-import { put, all, takeEvery } from 'redux-saga/effects';
+import { put, all, takeEvery, takeLatest, delay } from 'redux-saga/effects';
 
 import axios from '../../axios-db';
 import * as actionTypes from '../actions/actionTypes';
@@ -37,8 +37,44 @@ function* fetchingGames(action) {
     }
 }
 
+function* creatingGame(action) {
+    const { newGame } = action.payload;
+
+    try {
+        const response = yield axios.post(`/games.json?auth=${localStorage.getItem('token')}`, newGame );
+        const game = {
+            gameid: response.data.name,
+            game: {
+                ...newGame
+            }
+        };
+        yield put(actions.createGameSuccess(game));
+    } catch(error) {
+        if (error.response) {
+            yield put(
+                actions.createGameFailed({
+                    message: error.response.data.error.message
+                })
+            );
+        } else {
+            yield put(
+                actions.createGameFailed({
+                    message: "Can't create games right now, please try again."
+                })
+            );
+        }
+    }
+}
+
+function* createGameSuccess(action) {
+    yield put(actions.creatingNewGameComplete());
+    yield put(actions.fetchingGames());
+}
+
 export function* watchGame() {
     yield all([
-        takeEvery(actionTypes.FETCHING_GAMES, fetchingGames)
+        takeEvery(actionTypes.FETCHING_GAMES, fetchingGames),
+        takeEvery(actionTypes.CREATE_GAME_START, creatingGame),
+        takeEvery(actionTypes.CREATE_GAME_SUCCESS, createGameSuccess)
     ]);
 }

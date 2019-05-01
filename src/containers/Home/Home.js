@@ -10,12 +10,8 @@ import Game from '../Game/Game';
 
 class Home extends Component {
     state = {
-        creatingNewGame: false,
         totalPlayers: 2,
-        canCreateGame: true,
-        selectedGame: null,
-        isLoggingIn: true,
-        isSigningUp: false
+        canCreateGame: true
     };
 
     componentWillMount() {}
@@ -25,40 +21,17 @@ class Home extends Component {
     }
 
     startCreateNewGame = () => {
-        this.setState({
-            creatingNewGame: true
-        });
+        // this.setState({
+        //     creatingNewGame: true
+        // });
+        this.props.creatingNewGame();
     };
 
     cancelCreateNewGame = () => {
-        this.setState({
-            creatingNewGame: false
-        });
-    };
-
-    saveNewGame = async () => {
-        const newGame = initNewGame(
-            [localStorage.getItem('userId')],
-            this.state.totalPlayers
-        );
-        const response = await cardGameDbAxios.post(
-            `/games.json?auth=${localStorage.getItem('token')}`,
-            newGame
-        );
-        const game = {
-            gameid: response.data.name,
-            game: {
-                ...newGame
-            }
-        };
-        const currentGames = [...this.state.games];
-        currentGames.push(game);
-        this.setState({
-            games: currentGames,
-            creatingNewGame: false,
-            totalPlayers: 2,
-            canCreateGame: true
-        });
+        // this.setState({
+        //     creatingNewGame: false
+        // });
+        this.props.creatingNewGameComplete()
     };
 
     setTotalPlayers = evt => {
@@ -86,71 +59,82 @@ class Home extends Component {
         }
     };
 
+    saveNewGame = async () => {
+        const newGame = initNewGame(
+            [localStorage.getItem('userId')],
+            this.state.totalPlayers
+        );
+        this.props.createNewGame(newGame);
+        // const response = await cardGameDbAxios.post(
+        //     `/games.json?auth=${localStorage.getItem('token')}`,
+        //     newGame
+        // );
+        // const game = {
+        //     gameid: response.data.name,
+        //     game: {
+        //         ...newGame
+        //     }
+        // };
+        // const currentGames = [...this.state.games];
+        // currentGames.push(game);
+        // this.setState({
+        //     games: currentGames,
+        //     creatingNewGame: false,
+        //     totalPlayers: 2,
+        //     canCreateGame: true
+        // });
+    };
+
     selectGame = (evt, g) => {
         evt.preventDefault();
-
-        this.setState(
-            {
-                selectedGame: null
-            },
-            () => {
-                this.setState({
-                    selectedGame: g
-                });
-            }
-        );
     };
 
     render() {
-        // let games = this.state.games.map((m, idx) => {
-        //     return (
-        //         <li key={m.gameid}>
-        //             <a href='#' onClick={evt => this.selectGame(evt, m)}>
-        //                 {m.gameid}
-        //             </a>
-        //         </li>
-        //     );
-        // });
-        // let createGameModal = this.state.creatingNewGame ? (
-        //     <div className='modal-mask'>
-        //         <div className='modal'>
-        //             <div className='modal-head'>
-        //                 <p className='modal-title'>New Game</p>
-        //             </div>
-        //             <div className='modal-body'>
-        //                 <div className='form-control'>
-        //                     <label>Number of Players?</label>
-        //                     <br />
-        //                     <small>Only up to 4 players</small>
-        //                     <input
-        //                         type='text'
-        //                         placeholder='Enter number of players'
-        //                         min='2'
-        //                         max='4'
-        //                         value={this.state.totalPlayers}
-        //                         onChange={this.setTotalPlayers}
-        //                     />
-        //                 </div>
-        //             </div>
-        //             <div className='modal-footer'>
-        //                 <button
-        //                     className='button-primary'
-        //                     onClick={this.saveNewGame}
-        //                     disabled={!this.state.canCreateGame}
-        //                 >
-        //                     Create
-        //                 </button>
-        //                 <button
-        //                     className='button-danger'
-        //                     onClick={this.cancelCreateNewGame}
-        //                 >
-        //                     Cancel
-        //                 </button>
-        //             </div>
-        //         </div>
-        //     </div>
-        // ) : null;
-
+        if (this.props.startingToCreateNewGame) {
+            return (
+                <div className='modal-mask'>
+                    <div className='modal'>
+                        <div className='modal-head'>
+                            <p className='modal-title'>New Game</p>
+                        </div>
+                        <div className='modal-body'>
+                            <div className='form-control'>
+                                <label>Number of Players?</label>
+                                <br />
+                                <small>Only up to 4 players</small>
+                                <input
+                                    type='text'
+                                    placeholder='Enter number of players'
+                                    min='2'
+                                    max='4'
+                                    value={this.state.totalPlayers}
+                                    onChange={this.setTotalPlayers}
+                                />
+                            </div>
+                        </div>
+                        <div className='modal-footer'>
+                            <button
+                                className='button-primary'
+                                onClick={this.saveNewGame}
+                                disabled={
+                                    !this.state.canCreateGame ||
+                                    this.props.processingNewGame
+                                }
+                            >
+                                Create
+                            </button>
+                            <button
+                                className='button-danger'
+                                onClick={this.cancelCreateNewGame}
+                                disabled={this.props.processingNewGame}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
         // let gameView = this.state.selectedGame ? (
         //     <div>
         //         <Game gameId={this.state.selectedGame.gameid} />
@@ -177,11 +161,7 @@ class Home extends Component {
                 );
             });
 
-            gameList = (
-                <ul className='sidebar-links'>
-                    {gamesListElement}
-                </ul>
-            );
+            gameList = <ul className='sidebar-links'>{gamesListElement}</ul>;
         }
 
         return (
@@ -208,16 +188,21 @@ class Home extends Component {
 
 const mapStateToProps = state => {
     return {
-        games: state.gameProvider.games,
         gameError: state.gameProvider.error,
+        games: state.gameProvider.games,
         loadingGames: state.gameProvider.loadingGames,
-        creatingNewGame: state.gameProvider.creatingNewGame
+        processingNewGame: state.gameProvider.processingNewGame,
+        startingToCreateNewGame: state.gameProvider.startingToCreateNewGame
     };
 };
 
 const mapDispatchToProps = dispatch => {
     return {
-        fetchingGames: () => dispatch(actions.fetchingGames())
+        fetchingGames: () => dispatch(actions.fetchingGames()),
+        createNewGame: game => dispatch(actions.createGameStart(game)),
+
+        creatingNewGame: () => dispatch(actions.creatingNewGame()),
+        creatingNewGameComplete: () => dispatch(actions.creatingNewGameComplete())
     };
 };
 

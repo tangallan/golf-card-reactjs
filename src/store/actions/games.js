@@ -1,30 +1,42 @@
 import * as actionTypes from './actionTypes';
 
-export const creatingGame = () => {
+export const creatingNewGame = () => {
     return {
-        type: actionTypes.CREATING_GAME
-    }
+        type: actionTypes.CREATING_NEW_GAME
+    };
 };
 
-export const createGameStart = (game) => {
+export const creatingNewGameComplete = () => {
+    return {
+        type: actionTypes.CREATING_NEW_GAME_COMPLETE
+    };
+};
+
+export const createGameStart = (newGame) => {
     return {
         type: actionTypes.CREATE_GAME_START,
+        payload: {
+            newGame: newGame
+        }
+    };
+};
+
+export const createGameSuccess = (game) => {
+    return {
+        type: actionTypes.CREATE_GAME_SUCCESS,
         payload: {
             game: game
         }
     };
 };
 
-export const createGameSuccess = () => {
+export const createGameFailed = (error) => {
     return {
-        type: actionTypes.CREATE_GAME_SUCCESS
-    }
-};
-
-export const createGameFailed = () => {
-    return {
-        type: actionTypes.CREATE_GAME_FAILED
-    }
+        type: actionTypes.CREATE_GAME_FAILED,
+        payload: {
+            error: error
+        }
+    };
 };
 
 

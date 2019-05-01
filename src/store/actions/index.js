@@ -1,7 +1,12 @@
 export {
     fetchingGames,
     fetchGamesSuccess,
-    fetchGamesFailed
+    fetchGamesFailed,
+    createGameStart,
+    createGameSuccess,
+    createGameFailed,
+    creatingNewGame,
+    creatingNewGameComplete
 } from './games';
 
 export {
