@@ -30,6 +30,7 @@ class App extends Component {
             routes = (
                 <Switch>
                     <Route path='/' exact component={Home} />
+                    <Route path='/game' component={Home} />
                     <Redirect to='/' />
                 </Switch>
             );

@@ -42,6 +42,8 @@ function* logoutSaga(action) {
     yield localStorage.removeItem('expirationDate');
     yield localStorage.removeItem('userId');
 
+    yield delay(3000);
+
     yield put(actions.logoutSucceed());
 }
 

@@ -7,7 +7,8 @@ const initalState = {
     loading: false,
     authRedirect: '/',
     email: '',
-    password: ''
+    password: '',
+    loggingOut: false
 };
 
 const authStart = (state, action) => {
@@ -42,6 +43,13 @@ const authFail = (state, action) => {
     };
 };
 
+const authLogout = (state, action) => {
+    return {
+        ...state,
+        loggingOut: true
+    };
+};
+
 const authLoggedOut = (state, action) => {
     return {
         ...state,
@@ -51,7 +59,8 @@ const authLoggedOut = (state, action) => {
         loading: false,
         authRedirect: '/',
         email: '',
-        password: ''
+        password: '',
+        loggingOut: false
     };
 };
 
@@ -63,6 +72,8 @@ const reducer = (state = initalState, action) => {
             return authSuccess(state, action);
         case actionTypes.AUTH_FAIL:
             return authFail(state, action);
+        case actionTypes.AUTH_INITIATE_LOGOUT:
+            return authLogout(state, action);
         case actionTypes.AUTH_LOGOUT:
             return authLoggedOut(state, action);
         default:

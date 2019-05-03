@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import cardGameDbAxios from '../../axios-db';
@@ -170,17 +171,22 @@ class Home extends Component {
                     <div className='sidebar sidebar-left'>
                         <div className='sidebar-category'>
                             <button
-                                className='button-primary button-round'
-                                onClick={this.startCreateNewGame}
+                                className='button-primary button-round button-small'
+                                onClick={this.startCreateNewGame}   
                             >
                                 Create New Game
+                            </button>
+                            <button className='button-danger button-round button-small' onClick={this.props.logout} disabled={this.props.loggingOut}>
+                                Logout
                             </button>
                         </div>
                         {/* <ul className='sidebar-links'>{games}</ul> */}
                         {gameList}
                     </div>
                 </div>
-                <div className='col col-lg-8'>{/* {gameView} */}</div>
+                <div className='col col-lg-8'>
+                    <Route path='/game/:id' exact component={<p>Game</p>} />
+                </div>
             </div>
         );
     }
@@ -192,7 +198,9 @@ const mapStateToProps = state => {
         games: state.gameProvider.games,
         loadingGames: state.gameProvider.loadingGames,
         processingNewGame: state.gameProvider.processingNewGame,
-        startingToCreateNewGame: state.gameProvider.startingToCreateNewGame
+        startingToCreateNewGame: state.gameProvider.startingToCreateNewGame,
+
+        loggingOut: state.auth.loggingOut
     };
 };
 
@@ -202,7 +210,9 @@ const mapDispatchToProps = dispatch => {
         createNewGame: game => dispatch(actions.createGameStart(game)),
 
         creatingNewGame: () => dispatch(actions.creatingNewGame()),
-        creatingNewGameComplete: () => dispatch(actions.creatingNewGameComplete())
+        creatingNewGameComplete: () => dispatch(actions.creatingNewGameComplete()),
+
+        logout: () => dispatch(actions.logout())
     };
 };
 
