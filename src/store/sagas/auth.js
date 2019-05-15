@@ -1,9 +1,12 @@
 import { put, delay, call, all, takeEvery } from 'redux-saga/effects';
 
-import axios from '../../axios-db';
-
 import * as actionTypes from '../actions/actionTypes';
 import * as actions from '../actions/index';
+import rsf from '../firebase/rsf';
+
+// import Firebase from '../firebase/firebase';
+// const myFirebase = new Firebase();
+
 
 // trigger by actionTypes.AUTH_CHECK_STATE
 function* authCheckStateSaga(action) {
@@ -38,6 +41,7 @@ function* authSetTimeoutSaga(action) {
 
 // trigger by actionTypes.AUTH_INITIATE_LOGOUT
 function* logoutSaga(action) {
+    yield rsf.auth.signOut();
     yield localStorage.removeItem('token');
     yield localStorage.removeItem('expirationDate');
     yield localStorage.removeItem('userId');
@@ -49,28 +53,21 @@ function* logoutSaga(action) {
 
 // trigger by actionTypes.AUTH_START
 function* loggingIn(action) {
-    const { email, password } = action.payload;
-
-    const loginUrl = `https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=${
-        process.env.REACT_APP_FIREBASE_API_KEY
-    }`;
-
-    const authData = {
-        email: email,
-        password: password,
-        returnSecureToken: true
-    };
-
+    const { email, password } = action.payload;    
     try {
-        const loginResp = yield axios.post(loginUrl, authData);
-        const expirationDate = yield new Date(
-            new Date().getTime() + loginResp.data.expiresIn * 1000
-        );
-        yield localStorage.setItem('token', loginResp.data.idToken);
-        yield localStorage.setItem('expirationDate', expirationDate);
-        yield localStorage.setItem('userId', loginResp.data.localId);
+        const fLoginResp = yield rsf.auth.signInWithEmailAndPassword(email, password);
+        //const fLoginResp = yield myFirebase.loginWithEmailAndPassword(email, password);
+        const { uid } = fLoginResp.user;
+        const idToken = yield fLoginResp.user.getIdToken();
 
-        yield put(actions.authSuccess(loginResp.data.idToken, loginResp.data.userId));
+        const expirationDate = yield new Date(
+            new Date().getTime() + (3600 * 1000)
+        );
+        yield localStorage.setItem('token', idToken);
+        yield localStorage.setItem('expirationDate', expirationDate);
+        yield localStorage.setItem('userId', uid);
+
+        yield put(actions.authSuccess(idToken, uid));
         yield put(actions.authCheckState());
     } catch (error) {
         if (error.response) {

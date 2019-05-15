@@ -185,7 +185,7 @@ class Home extends Component {
                     </div>
                 </div>
                 <div className='col col-lg-8'>
-                    <Route path='/game/:id' exact component={<p>Game</p>} />
+                    {/* <Route path='/game/:id' exact component={<p>Game</p>} /> */}
                 </div>
             </div>
         );

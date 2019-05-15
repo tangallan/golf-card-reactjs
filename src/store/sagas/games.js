@@ -1,11 +1,21 @@
-import { put, all, takeEvery, takeLatest, delay } from 'redux-saga/effects';
+import { put, all, takeEvery, call } from 'redux-saga/effects';
 
 import axios from '../../axios-db';
 import * as actionTypes from '../actions/actionTypes';
 import * as actions from '../actions/';
 
+import firebase from 'firebase';
+import rsf from '../firebase/rsf';
+
 function* fetchingGames(action) {
     const token = yield localStorage.getItem('token');
+
+    // const g = yield call(
+    //     rsf.database.read,
+    //     firebase.database().ref('games')
+    //   );
+    //   console.log('g', g);
+
     try {
         const games = yield axios.get(`/games.json?auth=${token}`);
         let gamesMapped = [];
@@ -39,9 +49,12 @@ function* fetchingGames(action) {
 
 function* creatingGame(action) {
     const { newGame } = action.payload;
-
+    newGame.totalPlayers = parseInt(newGame.totalPlayers);
     try {
-        const response = yield axios.post(`/games.json?auth=${localStorage.getItem('token')}`, newGame );
+        const response = yield axios.post(
+            `/games.json?auth=${localStorage.getItem('token')}`,
+            newGame
+        );
         const game = {
             gameid: response.data.name,
             game: {
@@ -49,7 +62,7 @@ function* creatingGame(action) {
             }
         };
         yield put(actions.createGameSuccess(game));
-    } catch(error) {
+    } catch (error) {
         if (error.response) {
             yield put(
                 actions.createGameFailed({
